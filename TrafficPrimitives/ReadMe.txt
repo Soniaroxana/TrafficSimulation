@@ -1,4 +1,4 @@
 All traffic primitives should go here
 TrafficLight - barrier
-Car - Lock
-Intersection - Critical Section
+main.Car - Lock
+main.Intersection - Critical Section
