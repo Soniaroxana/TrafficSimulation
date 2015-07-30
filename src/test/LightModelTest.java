@@ -68,7 +68,8 @@ public class LightModelTest {
                 new Car(intersections, Direction.WEST, 5000L, 14, 30),
                 new Car(intersections, Direction.WEST, 5000L, 15, 20)
         };*/
-        Car[] cars = GenerateCars.GenerateRandomCars(100, intersections);
+
+        ArrayList<Car> cars = GenerateCars.GenerateRandomCars(100, intersections);
 
         Thread lightModelThread = new Thread(lightModel);
         lightModelThread.start();
@@ -134,7 +135,8 @@ public class LightModelTest {
                 new Car(intersections, Direction.WEST, 5000L, 14),
                 new Car(intersections, Direction.WEST, 5000L, 15)
         };*/
-        Car[] cars = GenerateCars.GenerateRandomCars(100,intersections);
+        
+        ArrayList<Car> cars = GenerateCars.GenerateRandomCars(100, intersections);
 
         for (LightModel lightModel : lightModels) {
             new Thread(lightModel).start();
@@ -146,6 +148,4 @@ public class LightModelTest {
 
         Thread.sleep(15000L);
     }
-
-
 }

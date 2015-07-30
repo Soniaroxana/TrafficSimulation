@@ -7,11 +7,13 @@ import java.util.Random;
  */
 public class GenerateCars {
     public static ArrayList<Car> GenerateRandomCars(int n, Intersection[] intersections){
-        ArrayList<Car> cars;
+        ArrayList<Car> cars = new ArrayList<>();
         Random rand = new Random();
+
         for (int i = 0; i < n; i++){
-            cars.add(new Car(intersections, rand.nextInt()%4,1000L*(rand.nextInt()%10),i,(rand.nextInt()%10)*10));
+            cars.add(new Car(intersections, Direction.valueOf(rand.nextInt() % 4), 1000L * (rand.nextInt() % 10), i, (rand.nextInt() % 10) * 10));
         }
+
         return cars;
     }
 }

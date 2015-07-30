@@ -12,4 +12,14 @@ public enum Direction {
     Direction(int value) {
         this.value = value;
     }
+
+    public static Direction valueOf(int value) {
+        switch (value) {
+            case 0 : return NORTH;
+            case 1 : return EAST;
+            case 2 : return SOUTH;
+            case 3 : return WEST;
+            default: return null;
+        }
+    }
 }
