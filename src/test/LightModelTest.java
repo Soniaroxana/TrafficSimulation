@@ -50,24 +50,25 @@ public class LightModelTest {
                 new Intersection(lightModel, 0)
         };
 
-        Car[] cars = new Car[] {
-                new Car(intersections, Direction.NORTH, 1000L, 0),
-                new Car(intersections, Direction.NORTH, 2000L, 1),
-                new Car(intersections, Direction.NORTH, 2000L, 2),
-                new Car(intersections, Direction.NORTH, 2000L, 3),
-                new Car(intersections, Direction.EAST, 2000L, 4),
-                new Car(intersections, Direction.EAST, 3000L, 5),
-                new Car(intersections, Direction.EAST, 3000L, 6),
-                new Car(intersections, Direction.EAST, 3000L, 7),
-                new Car(intersections, Direction.SOUTH, 2000L, 8),
-                new Car(intersections, Direction.SOUTH, 3000L, 9),
-                new Car(intersections, Direction.SOUTH, 3000L, 10),
-                new Car(intersections, Direction.SOUTH, 3000L, 11),
-                new Car(intersections, Direction.WEST, 4000L, 12),
-                new Car(intersections, Direction.WEST, 5000L, 13),
-                new Car(intersections, Direction.WEST, 5000L, 14),
-                new Car(intersections, Direction.WEST, 5000L, 15)
-        };
+        /*Car[] cars = new Car[] {
+                new Car(intersections, Direction.NORTH, 1000L, 0, 30),
+                new Car(intersections, Direction.NORTH, 2000L, 1, 50),
+                new Car(intersections, Direction.NORTH, 2000L, 2, 30),
+                new Car(intersections, Direction.NORTH, 2000L, 3, 40),
+                new Car(intersections, Direction.EAST, 2000L, 4, 60),
+                new Car(intersections, Direction.EAST, 3000L, 5, 20),
+                new Car(intersections, Direction.EAST, 3000L, 6, 50),
+                new Car(intersections, Direction.EAST, 3000L, 7, 20),
+                new Car(intersections, Direction.SOUTH, 2000L, 8, 30),
+                new Car(intersections, Direction.SOUTH, 3000L, 9, 20),
+                new Car(intersections, Direction.SOUTH, 3000L, 10, 30),
+                new Car(intersections, Direction.SOUTH, 3000L, 11, 20),
+                new Car(intersections, Direction.WEST, 4000L, 12, 30),
+                new Car(intersections, Direction.WEST, 5000L, 13, 20),
+                new Car(intersections, Direction.WEST, 5000L, 14, 30),
+                new Car(intersections, Direction.WEST, 5000L, 15, 20)
+        };*/
+        Car[] cars = GenerateCars.GenerateRandomCars(100, intersections);
 
         Thread lightModelThread = new Thread(lightModel);
         lightModelThread.start();
@@ -115,7 +116,7 @@ public class LightModelTest {
                 new Intersection(lightModels[3], 3)
         };
 
-        Car[] cars = new Car[] {
+        /*Car[] cars = new Car[] {
                 new Car(intersections, Direction.NORTH, 1000L, 0),
                 new Car(intersections, Direction.NORTH, 2000L, 1),
                 new Car(intersections, Direction.NORTH, 2000L, 2),
@@ -132,7 +133,8 @@ public class LightModelTest {
                 new Car(intersections, Direction.WEST, 5000L, 13),
                 new Car(intersections, Direction.WEST, 5000L, 14),
                 new Car(intersections, Direction.WEST, 5000L, 15)
-        };
+        };*/
+        Car[] cars = GenerateCars.GenerateRandomCars(100,intersections);
 
         for (LightModel lightModel : lightModels) {
             new Thread(lightModel).start();

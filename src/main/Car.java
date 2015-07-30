@@ -7,6 +7,12 @@ public class Car implements Runnable {
     public Direction direction;
     public long delay;
     public int id;
+    public Position initPosition;
+    public Position finalDestination;
+    public Position currentPosition;
+    public Map map;
+    public long speed;
+
 
     public Car(Intersection[] intersections, Direction direction, int id) {
         this.intersections = intersections;
@@ -20,6 +26,19 @@ public class Car implements Runnable {
         this.direction = direction;
         this.delay = delay;
         this.id = id;
+        this.initPosition = this.currentPosition = new Position(0,0, LocationType.LANE);
+        currentPosition.directions.add(this.direction);
+        speed = 50;
+    }
+
+    public Car(Intersection[] intersections, Direction direction, long delay, int id, long speed) {
+        this.intersections = intersections;
+        this.direction = direction;
+        this.delay = delay;
+        this.id = id;
+        this.initPosition = this.currentPosition = new Position(0,0, LocationType.LANE);
+        currentPosition.directions.add(this.direction);
+        this.speed = speed;
     }
 
     @Override
@@ -36,6 +55,8 @@ public class Car implements Runnable {
                 }
 
                 intersection.locks[direction.value].lock();
+
+                Thread.sleep(speed*10L*intersection.length);
 
                 intersection.remove(this);
 

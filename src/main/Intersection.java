@@ -9,6 +9,7 @@ public class Intersection {
     public Barrier[] barriers;
     public Lock[] locks;
     public int id;
+    public long length;
 
     public Intersection(LightModel lightModel, int id) {
         this.lightModel = lightModel;
@@ -22,6 +23,7 @@ public class Intersection {
         };
 
         this.id = id;
+        this.length = 2; //positions
     }
 
     public void begin() {}
