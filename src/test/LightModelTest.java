@@ -135,7 +135,7 @@ public class LightModelTest {
                 new Car(intersections, Direction.WEST, 5000L, 14),
                 new Car(intersections, Direction.WEST, 5000L, 15)
         };*/
-        
+
         ArrayList<Car> cars = GenerateCars.GenerateRandomCars(100, intersections);
 
         for (LightModel lightModel : lightModels) {
