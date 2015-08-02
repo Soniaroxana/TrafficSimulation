@@ -35,6 +35,7 @@ public class MapTest {
 
         Car[] cars = new Car[] {
                 new Car(map, intersections, 100L, 0, 60, 2, 0, 2, 9),
+                new Car(map, intersections, 2000L, 4, 60, 1, 5, 1, 0),
                 new Car(map, intersections, 100L, 1, 60, 1, 9, 1, 0),
                 new Car(map, intersections, 4000L, 2, 30, 0, 1, 9, 1),
                 new Car(map, intersections, 1000L, 3, 30, 9, 2, 0, 2),

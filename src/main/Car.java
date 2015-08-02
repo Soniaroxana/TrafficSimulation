@@ -46,6 +46,7 @@ public class Car implements Runnable {
         this.delay = delay;
         this.id = id;
         this.initPosition = this.currentPosition = map.mapLocations[initx][inity];
+        map.mapLocations[initx][inity].enter();
         this.direction = initPosition.directions.get(0);
         this.finalDestination = map.mapLocations[finalx][finaly];
         this.speed = speed;
@@ -95,9 +96,10 @@ public class Car implements Runnable {
                         System.out.println("I ( " + this.id + " ) have passed intersection " + intersection.id + " going " + direction.toString() + "!!!");
                     }}
                 } else {
-                    next.lock.lock();
+                    Thread.sleep(speed * 10L * 1);
+                    currentPosition.exit();
+                    next.enter();
                     currentPosition = next;
-                    next.lock.unlock();
                 }
                 /*
                 for (Intersection intersection : intersections) {
