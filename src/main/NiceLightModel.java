@@ -13,9 +13,9 @@ public class NiceLightModel extends LightModel {
     public void run() {
         while (true) {
             for(Barrier barrier : barriers) {
-                if (barrier.cars.size() >= threshold) {
+                if (barrier.cars.size() >= threshold && barrier.isBlocking) {
                     enable(barrier);
-                } else {
+                } else if (!barrier.cars.isEmpty()) {
                     disable(barrier);
                 }
             }

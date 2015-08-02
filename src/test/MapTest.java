@@ -17,7 +17,8 @@ public class MapTest {
                 new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
         };
 
-        LightModel lightModel = new TimedLightModel(barriers, 5000L);
+//        LightModel lightModel = new TimedLightModel(barriers, 5000L);
+        LightModel lightModel = new NiceLightModel(barriers, 1);
 
         Map map = new Map(10,10,1,1,lightModel);
 
