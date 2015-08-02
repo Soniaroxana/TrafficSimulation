@@ -145,6 +145,14 @@ public class LightModelTest {
             new Thread(car).start();
         }
 
-        Thread.sleep(15000L);
+        Thread.sleep(20000L);
+
+        for (Intersection intersection : intersections) {
+            System.out.println("Metrics for intersection " + intersection.id + ":");
+            System.out.println("\t" + "Throughput : " + Arrays.toString(intersection.directionalThroughput));
+            System.out.println("\t" + "Average Wait : " + Arrays.toString(intersection.directionalAverageWait));
+            System.out.println("\t" + "Max Wait : " + Arrays.toString(intersection.directionalMaxWait));
+            System.out.println("\t" + "Min Wait : " + Arrays.toString(intersection.directionalMinWait));
+        }
     }
 }

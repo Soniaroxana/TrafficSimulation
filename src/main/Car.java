@@ -12,6 +12,7 @@ public class Car implements Runnable {
     public Position currentPosition;
     public Map map; //make map a singleton
     public long speed;
+    public long lastWait = 0L;
 
 
     public Car(Intersection[] intersections, Direction direction, int id) {
@@ -26,7 +27,7 @@ public class Car implements Runnable {
         this.direction = direction;
         this.delay = delay;
         this.id = id;
-        this.initPosition = this.currentPosition = new Position(0,0, LocationType.LANE);
+        this.initPosition = this.currentPosition = new Position(0, 0, LocationType.LANE);
         currentPosition.directions.add(this.direction);
         speed = 50;
     }
@@ -36,7 +37,7 @@ public class Car implements Runnable {
         this.direction = direction;
         this.delay = delay;
         this.id = id;
-        this.initPosition = this.currentPosition = new Position(0,0, LocationType.LANE);
+        this.initPosition = this.currentPosition = new Position(0, 0, LocationType.LANE);
         currentPosition.directions.add(this.direction);
         this.speed = speed;
     }
@@ -53,16 +54,16 @@ public class Car implements Runnable {
         this.map = map;
     }
 
-    public Position NextPosition(int steps){
-        switch (this.direction){
+    public Position NextPosition(int steps) {
+        switch (this.direction) {
             case NORTH:
-                return map.mapLocations[currentPosition.x-steps][currentPosition.y];
+                return map.mapLocations[currentPosition.x - steps][currentPosition.y];
             case SOUTH:
-                return map.mapLocations[currentPosition.x+steps][currentPosition.y];
+                return map.mapLocations[currentPosition.x + steps][currentPosition.y];
             case EAST:
-                return map.mapLocations[currentPosition.x][currentPosition.y+steps];
+                return map.mapLocations[currentPosition.x][currentPosition.y + steps];
             case WEST:
-                return map.mapLocations[currentPosition.x][currentPosition.y-steps];
+                return map.mapLocations[currentPosition.x][currentPosition.y - steps];
         }
         return null;
     }
@@ -70,31 +71,36 @@ public class Car implements Runnable {
     @Override
     public void run() {
         try {
-            while(!(currentPosition.equals(finalDestination))) {
-                System.out.println("My ( " + this.id + " ) current position is ( " + currentPosition.x + " , " + currentPosition.y + " ) going "+this.direction);
+            while (!(currentPosition.equals(finalDestination))) {
+                System.out.println("My ( " + this.id + " ) current position is ( " + currentPosition.x + " , " + currentPosition.y + " ) going " + this.direction);
                 Thread.sleep(delay);
                 Position next = NextPosition(1);
-                if (next.locationtype == LocationType.INTERSECTION){
+                if (next.locationtype == LocationType.INTERSECTION) {
                     for (Intersection intersection : intersections) {
-                        if (intersection.locations.contains(next)){
-                        Barrier barrier = intersection.accept(this);
+                        if (intersection.locations.contains(next)) {
 
-                        while (barrier.isBlocking) {
-                            System.out.println("I ( " + this.id + " ) am waiting at intersection " + intersection.id + " going " + direction.toString() + "!!!");
-                            Thread.sleep(100L);
+                            Barrier barrier = intersection.accept(this);
+                            lastWait = System.currentTimeMillis();
+
+                            while (barrier.isBlocking) {
+                                System.out.println("I ( " + this.id + " ) am waiting at intersection " + intersection.id + " going " + direction.toString() + "!!!");
+                                Thread.sleep(100L);
+                            }
+
+                            intersection.locks[direction.value].lock();
+
+                            Thread.sleep(speed * 10L * intersection.length);
+
+                            currentPosition = NextPosition(1);
+
+                            lastWait = System.currentTimeMillis() - lastWait;
+                            intersection.remove(this);
+
+                            intersection.locks[direction.value].unlock();
+
+                            System.out.println("I ( " + this.id + " ) have passed intersection " + intersection.id + " going " + direction.toString() + "!!!");
                         }
-                        intersection.locks[direction.value].lock();
-
-                        Thread.sleep(speed * 10L * intersection.length);
-
-                        currentPosition = NextPosition(1);
-
-                        intersection.remove(this);
-
-                        intersection.locks[direction.value].unlock();
-
-                        System.out.println("I ( " + this.id + " ) have passed intersection " + intersection.id + " going " + direction.toString() + "!!!");
-                    }}
+                    }
                 } else {
                     Thread.sleep(speed * 10L * 1);
                     currentPosition.exit();
