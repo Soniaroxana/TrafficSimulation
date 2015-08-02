@@ -1,15 +1,16 @@
+/**
+ * Created by soniamarginean on 8/2/15.
+ */
+import javafx.geometry.Pos;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-/**
- * Created by neelshah on 7/24/15.
- */
-public class LightModelTest {
+public class MapTest {
 
     @Test
-    public void testLightModel() throws InterruptedException {
+    public void testSimpleMapModel() throws InterruptedException {
 
         Barrier[] barriers = new Barrier[] {
                 new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
@@ -18,12 +19,25 @@ public class LightModelTest {
 
         LightModel lightModel = new TimedLightModel(barriers, 5000L);
 
+        Map map = new Map(10,10,1,1,lightModel);
+
+        map.print();
+
+        ArrayList<Position> pos = new ArrayList<Position>();
+        pos.add(map.mapLocations[1][1]);
+        pos.add(map.mapLocations[1][2]);
+        pos.add(map.mapLocations[2][1]);
+        pos.add(map.mapLocations[2][2]);
+
         Intersection[] intersections = new Intersection[] {
-                new Intersection(lightModel, 0)
+                new Intersection(lightModel, 0, pos)
         };
 
         Car[] cars = new Car[] {
-                new Car(intersections, Direction.EAST, 1000L, 0),
+                new Car(map, intersections, 100L, 0, 60, 2, 0, 2, 9),
+                new Car(map, intersections, 100L, 1, 60, 1, 9, 1, 0),
+                new Car(map, intersections, 4000L, 2, 30, 0, 1, 9, 1),
+                new Car(map, intersections, 1000L, 3, 30, 9, 2, 0, 2),
         };
 
         Thread lightModelThread = new Thread(lightModel);
@@ -33,12 +47,13 @@ public class LightModelTest {
             new Thread(car).start();
         }
 
-        Thread.sleep(10000L);
+        Thread.sleep(20000L);
     }
 
     @Test
-    public void testMultipleCars() throws InterruptedException {
+    public void testRandomlyGeneratedCars() throws InterruptedException {
 
+        /*
         Barrier[] barriers = new Barrier[] {
                 new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
                 new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
@@ -50,24 +65,6 @@ public class LightModelTest {
                 new Intersection(lightModel, 0)
         };
 
-        /*Car[] cars = new Car[] {
-                new Car(intersections, Direction.NORTH, 1000L, 0, 30),
-                new Car(intersections, Direction.NORTH, 2000L, 1, 50),
-                new Car(intersections, Direction.NORTH, 2000L, 2, 30),
-                new Car(intersections, Direction.NORTH, 2000L, 3, 40),
-                new Car(intersections, Direction.EAST, 2000L, 4, 60),
-                new Car(intersections, Direction.EAST, 3000L, 5, 20),
-                new Car(intersections, Direction.EAST, 3000L, 6, 50),
-                new Car(intersections, Direction.EAST, 3000L, 7, 20),
-                new Car(intersections, Direction.SOUTH, 2000L, 8, 30),
-                new Car(intersections, Direction.SOUTH, 3000L, 9, 20),
-                new Car(intersections, Direction.SOUTH, 3000L, 10, 30),
-                new Car(intersections, Direction.SOUTH, 3000L, 11, 20),
-                new Car(intersections, Direction.WEST, 4000L, 12, 30),
-                new Car(intersections, Direction.WEST, 5000L, 13, 20),
-                new Car(intersections, Direction.WEST, 5000L, 14, 30),
-                new Car(intersections, Direction.WEST, 5000L, 15, 20)
-        };*/
         ArrayList<Car> cars = GenerateCars.GenerateRandomCars(100, intersections);
 
         Thread lightModelThread = new Thread(lightModel);
@@ -77,12 +74,12 @@ public class LightModelTest {
             new Thread(car).start();
         }
 
-        Thread.sleep(10000L);
+        Thread.sleep(10000L);*/
     }
 
     @Test
     public void testMultipleIntersections() throws InterruptedException {
-
+        /*
         Barrier[][] barriers = {
                 new Barrier[] {
                         new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
@@ -116,24 +113,6 @@ public class LightModelTest {
                 new Intersection(lightModels[3], 3)
         };
 
-        /*Car[] cars = new Car[] {
-                new Car(intersections, Direction.NORTH, 1000L, 0),
-                new Car(intersections, Direction.NORTH, 2000L, 1),
-                new Car(intersections, Direction.NORTH, 2000L, 2),
-                new Car(intersections, Direction.NORTH, 2000L, 3),
-                new Car(intersections, Direction.EAST, 2000L, 4),
-                new Car(intersections, Direction.EAST, 3000L, 5),
-                new Car(intersections, Direction.EAST, 3000L, 6),
-                new Car(intersections, Direction.EAST, 3000L, 7),
-                new Car(intersections, Direction.SOUTH, 2000L, 8),
-                new Car(intersections, Direction.SOUTH, 3000L, 9),
-                new Car(intersections, Direction.SOUTH, 3000L, 10),
-                new Car(intersections, Direction.SOUTH, 3000L, 11),
-                new Car(intersections, Direction.WEST, 4000L, 12),
-                new Car(intersections, Direction.WEST, 5000L, 13),
-                new Car(intersections, Direction.WEST, 5000L, 14),
-                new Car(intersections, Direction.WEST, 5000L, 15)
-        };*/
 
         ArrayList<Car> cars = GenerateCars.GenerateRandomCars(100, intersections);
 
@@ -145,6 +124,6 @@ public class LightModelTest {
             new Thread(car).start();
         }
 
-        Thread.sleep(15000L);
+        Thread.sleep(15000L);*/
     }
 }

@@ -16,4 +16,17 @@ public class GenerateCars {
 
         return cars;
     }
+
+    public static ArrayList<Car> GenerateCarsOnMap(int n, Map map){
+        ArrayList<Car> cars = new ArrayList<>();
+        Random rand = new Random();
+
+        Intersection[] intersections = map.getIntersections();
+
+        for (int i = 0; i < n; i++){
+            cars.add(new Car(intersections, Direction.valueOf(rand.nextInt() % 4), 1000L * (rand.nextInt() % 10), i, (rand.nextInt() % 10) * 10));
+        }
+
+        return cars;
+    }
 }
