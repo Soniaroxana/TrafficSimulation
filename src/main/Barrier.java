@@ -18,7 +18,7 @@ public class Barrier {
 
     public Barrier(List<Direction> directions) {
         this.directions = directions;
-        this.cars = new ArrayList<>();
+        this.cars = new ArrayList<Car>();
     }
 
     public void acquire() {

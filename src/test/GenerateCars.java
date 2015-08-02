@@ -7,7 +7,7 @@ import java.util.Random;
  */
 public class GenerateCars {
     public static ArrayList<Car> GenerateRandomCars(int n, Intersection[] intersections){
-        ArrayList<Car> cars = new ArrayList<>();
+        ArrayList<Car> cars = new ArrayList<Car>();
         Random rand = new Random();
 
         for (int i = 0; i < n; i++){
