@@ -1,3 +1,5 @@
+import javafx.geometry.Pos;
+
 /**
  * Created by neelshah on 7/23/15.
  */
@@ -57,13 +59,13 @@ public class Car implements Runnable {
     public Position NextPosition(int steps) {
         switch (this.direction) {
             case NORTH:
-                return map.mapLocations[currentPosition.x - steps][currentPosition.y];
+                return map.mapLocations[Math.max(0,currentPosition.x-steps)][currentPosition.y];
             case SOUTH:
-                return map.mapLocations[currentPosition.x + steps][currentPosition.y];
+                return map.mapLocations[Math.min(map.length-1,currentPosition.x+steps)][currentPosition.y];
             case EAST:
-                return map.mapLocations[currentPosition.x][currentPosition.y + steps];
+                return map.mapLocations[currentPosition.x][Math.min(currentPosition.y+steps,map.width-1)];
             case WEST:
-                return map.mapLocations[currentPosition.x][currentPosition.y - steps];
+                return map.mapLocations[currentPosition.x][Math.max(0,currentPosition.y-steps)];
         }
         return null;
     }
@@ -71,28 +73,32 @@ public class Car implements Runnable {
     @Override
     public void run() {
         try {
-            while (!(currentPosition.equals(finalDestination))) {
-                System.out.println("My ( " + this.id + " ) current position is ( " + currentPosition.x + " , " + currentPosition.y + " ) going " + this.direction);
+            boolean waiting = false;
+            while(!(currentPosition.equals(finalDestination))) {
+                System.out.println("My ( " + this.id + " ) current position is ( " + currentPosition.x + " , " + currentPosition.y + " ) going "+this.direction + " to ( "+ finalDestination.x + " , " + finalDestination.y + " )");
                 Thread.sleep(delay);
                 Position next = NextPosition(1);
                 if (next.locationtype == LocationType.INTERSECTION) {
                     for (Intersection intersection : intersections) {
                         if (intersection.locations.contains(next)) {
-
                             Barrier barrier = intersection.accept(this);
                             lastWait = System.currentTimeMillis();
 
                             while (barrier.isBlocking) {
-                                System.out.println("I ( " + this.id + " ) am waiting at intersection " + intersection.id + " going " + direction.toString() + "!!!");
+                                if (!waiting) {
+                                    System.out.println("I ( " + this.id + " ) am waiting at intersection " + intersection.id + " going " + direction.toString() + "!!!");
+                                }
+                                waiting = true;
                                 Thread.sleep(100L);
                             }
-
+                            waiting = false;
                             intersection.locks[direction.value].lock();
 
                             Thread.sleep(speed * 10L * intersection.length);
-
-                            currentPosition = NextPosition(1);
-
+                            next  = NextPosition(2);
+                            next.enter();
+                            currentPosition.exit();
+                            currentPosition = next;
                             lastWait = System.currentTimeMillis() - lastWait;
                             intersection.remove(this);
 
@@ -102,9 +108,9 @@ public class Car implements Runnable {
                         }
                     }
                 } else {
+                    next.enter();
                     Thread.sleep(speed * 10L * 1);
                     currentPosition.exit();
-                    next.enter();
                     currentPosition = next;
                 }
                 /*
@@ -128,6 +134,7 @@ public class Car implements Runnable {
                 }*/
             }
             System.out.println("I ( " + this.id + " ) have reached my final destination");
+            currentPosition.exit();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

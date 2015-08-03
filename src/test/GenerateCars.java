@@ -1,3 +1,5 @@
+import javafx.scene.effect.Light;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Array;
@@ -5,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.lang.Math;
 
 /**
  * Created by soniamarginean on 7/30/15.
@@ -21,18 +24,51 @@ public class GenerateCars {
         return cars;
     }
 
-    public static ArrayList<Car> GenerateCarsOnMap(int n, Map map) {
+
+    public static ArrayList<Car> GenerateCarsOnMap(Map map, double loadFactor, LightModel lightModel) {
         ArrayList<Car> cars = new ArrayList<Car>();
         Random rand = new Random();
+        // first get the allowed positions for placing cars for each lane in each direction
+        // also get the intersections per lane
+        // last put positions/loadFactor cars on the road for each lane
+        int carIndex = 0;
+        for (int i=0; i< map.horizontalRoads; i++){
+            ArrayList<Position> eastPositions = map.getLanePositions(i, Direction.EAST);
+            Intersection[] eastIntersections = map.getIntersections(i, Direction.EAST, lightModel);
+            int x = eastPositions.get(i).x;
+            for (int j=0; j< eastPositions.size()*loadFactor; j++){
+                cars.add(new Car(map,eastIntersections,Math.abs(1000L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), x,eastPositions.get(j).y, x, Math.min(map.width - 1, eastPositions.get(j).y + Math.abs(rand.nextInt(map.width - 1)))));
+                carIndex++;
+            }
+            ArrayList<Position> westPositions = map.getLanePositions(i, Direction.WEST);
+            Intersection[] westIntersections = map.getIntersections(i, Direction.WEST, lightModel);
+            x = westPositions.get(i).x;
+            for (int j=westPositions.size()-1; j>westPositions.size() - westPositions.size()*loadFactor; j--){
+                cars.add(new Car(map,westIntersections,Math.abs(1000L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), x, westPositions.get(j).y, x, Math.max(0, westPositions.get(j).y - Math.abs(rand.nextInt(map.width - 1)))));
+                carIndex++;
+            }
+        }
 
-        Intersection[] intersections = map.getIntersections();
-
-        for (int i = 0; i < n; i++) {
-            cars.add(new Car(intersections, Direction.valueOf(rand.nextInt() % 4), 1000L * (rand.nextInt() % 10), i, (rand.nextInt() % 10) * 10));
+        for (int i=0; i<map.verticalRoads; i++){
+            ArrayList<Position> northPositions = map.getLanePositions(i, Direction.NORTH);
+            Intersection[] northIntersections = map.getIntersections(i, Direction.NORTH, lightModel);
+            int y = northPositions.get(i).y;
+            for (int j=northPositions.size()-1; j> northPositions.size()-northPositions.size()*loadFactor; j--){
+                cars.add(new Car(map,northIntersections,Math.abs(1000L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), northPositions.get(j).x,y,Math.max(0, northPositions.get(i).x - Math.abs(rand.nextInt(map.length - 1))),y));
+                carIndex++;
+            }
+            ArrayList<Position> southPositions = map.getLanePositions(i, Direction.SOUTH);
+            Intersection[] southIntersections = map.getIntersections(i, Direction.SOUTH, lightModel);
+            y = southPositions.get(i).y;
+            for (int j=0; j< southPositions.size()*loadFactor; j++){
+                cars.add(new Car(map,southIntersections,Math.abs(1000L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), southPositions.get(j).x,y,Math.min(map.length - 1, southPositions.get(i).x + Math.abs(rand.nextInt(map.length - 1))),y));
+                carIndex++;
+            }
         }
 
         return cars;
     }
+
 
 
     public ArrayList<Car> GenerateCarsFromData(String filename, Intersection[] intersections) {

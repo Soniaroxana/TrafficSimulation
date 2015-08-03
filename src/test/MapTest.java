@@ -17,8 +17,8 @@ public class MapTest {
                 new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
         };
 
-//        LightModel lightModel = new TimedLightModel(barriers, 5000L);
-        LightModel lightModel = new NiceLightModel(barriers, 1);
+        LightModel lightModel = new TimedLightModel(barriers, 5000L);
+        //LightModel lightModel = new NiceLightModel(barriers, 1);
 
         Map map = new Map(10,10,1,1,lightModel);
 
@@ -36,10 +36,10 @@ public class MapTest {
 
         Car[] cars = new Car[] {
                 new Car(map, intersections, 100L, 0, 60, 2, 0, 2, 9),
-                new Car(map, intersections, 2000L, 4, 60, 1, 5, 1, 0),
+                new Car(map, intersections, 500L, 4, 60, 1, 5, 1, 0),
                 new Car(map, intersections, 100L, 1, 60, 1, 9, 1, 0),
-                new Car(map, intersections, 4000L, 2, 30, 0, 1, 9, 1),
-                new Car(map, intersections, 1000L, 3, 30, 9, 2, 0, 2),
+                new Car(map, intersections, 200L, 2, 30, 0, 1, 9, 1),
+                new Car(map, intersections, 500L, 3, 30, 9, 2, 0, 2),
         };
 
         Thread lightModelThread = new Thread(lightModel);
@@ -58,82 +58,5 @@ public class MapTest {
             System.out.println("\t" + "Max Wait : " + Arrays.toString(intersection.directionalMaxWait));
             System.out.println("\t" + "Min Wait : " + Arrays.toString(intersection.directionalMinWait));
         }
-    }
-
-    @Test
-    public void testRandomlyGeneratedCars() throws InterruptedException {
-
-        /*
-        Barrier[] barriers = new Barrier[] {
-                new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
-                new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
-        };
-
-        LightModel lightModel = new TimedLightModel(barriers, 5000L);
-
-        Intersection[] intersections = new Intersection[] {
-                new Intersection(lightModel, 0)
-        };
-
-        ArrayList<Car> cars = GenerateCars.GenerateRandomCars(100, intersections);
-
-        Thread lightModelThread = new Thread(lightModel);
-        lightModelThread.start();
-
-        for (Car car : cars) {
-            new Thread(car).start();
-        }
-
-        Thread.sleep(10000L);*/
-    }
-
-    @Test
-    public void testMultipleIntersections() throws InterruptedException {
-        /*
-        Barrier[][] barriers = {
-                new Barrier[] {
-                        new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
-                        new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
-                },
-                new Barrier[] {
-                        new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
-                        new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
-                },
-                new Barrier[] {
-                        new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
-                        new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
-                },
-                new Barrier[] {
-                        new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
-                        new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
-                }
-        };
-
-        LightModel[] lightModels= new LightModel[] {
-                new TimedLightModel(barriers[0], 2000L),
-                new TimedLightModel(barriers[1], 3000L),
-                new TimedLightModel(barriers[2], 2000L),
-                new TimedLightModel(barriers[3], 3000L)
-        };
-
-        Intersection[] intersections = new Intersection[] {
-                new Intersection(lightModels[0], 0),
-                new Intersection(lightModels[1], 1),
-                new Intersection(lightModels[2], 2),
-                new Intersection(lightModels[3], 3)
-        };
-
-
-        ArrayList<Car> cars = GenerateCars.GenerateRandomCars(100, intersections);
-
-        for (LightModel lightModel : lightModels) {
-            new Thread(lightModel).start();
-        }
-
-        for (Car car : cars) {
-            new Thread(car).start();
-        }
-
-        Thread.sleep(15000L);*/
     }
 }
