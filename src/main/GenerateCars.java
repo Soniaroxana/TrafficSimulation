@@ -34,14 +34,14 @@ public class GenerateCars {
         int carIndex = 0;
         for (int i=0; i< map.horizontalRoads; i++){
             ArrayList<Position> eastPositions = map.getLanePositions(i, Direction.EAST);
-            Intersection[] eastIntersections = map.getIntersections(i, Direction.EAST, lightModel);
+            Intersection[] eastIntersections = map.getMyIntersections(i, Direction.EAST, lightModel);
             int x = eastPositions.get(i).x;
             for (int j=0; j< eastPositions.size()*loadFactor; j++){
                 cars.add(new Car(map,eastIntersections,Math.abs(1000L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), x,eastPositions.get(j).y, x, Math.min(map.width - 1, eastPositions.get(j).y + Math.abs(rand.nextInt(map.width - 1)))));
                 carIndex++;
             }
             ArrayList<Position> westPositions = map.getLanePositions(i, Direction.WEST);
-            Intersection[] westIntersections = map.getIntersections(i, Direction.WEST, lightModel);
+            Intersection[] westIntersections = map.getMyIntersections(i, Direction.WEST, lightModel);
             x = westPositions.get(i).x;
             for (int j=westPositions.size()-1; j>westPositions.size() - westPositions.size()*loadFactor; j--){
                 cars.add(new Car(map,westIntersections,Math.abs(1000L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), x, westPositions.get(j).y, x, Math.max(0, westPositions.get(j).y - Math.abs(rand.nextInt(map.width - 1)))));
@@ -51,14 +51,14 @@ public class GenerateCars {
 
         for (int i=0; i<map.verticalRoads; i++){
             ArrayList<Position> northPositions = map.getLanePositions(i, Direction.NORTH);
-            Intersection[] northIntersections = map.getIntersections(i, Direction.NORTH, lightModel);
+            Intersection[] northIntersections = map.getMyIntersections(i, Direction.NORTH, lightModel);
             int y = northPositions.get(i).y;
             for (int j=northPositions.size()-1; j> northPositions.size()-northPositions.size()*loadFactor; j--){
                 cars.add(new Car(map,northIntersections,Math.abs(1000L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), northPositions.get(j).x,y,Math.max(0, northPositions.get(i).x - Math.abs(rand.nextInt(map.length - 1))),y));
                 carIndex++;
             }
             ArrayList<Position> southPositions = map.getLanePositions(i, Direction.SOUTH);
-            Intersection[] southIntersections = map.getIntersections(i, Direction.SOUTH, lightModel);
+            Intersection[] southIntersections = map.getMyIntersections(i, Direction.SOUTH, lightModel);
             y = southPositions.get(i).y;
             for (int j=0; j< southPositions.size()*loadFactor; j++){
                 cars.add(new Car(map,southIntersections,Math.abs(1000L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), southPositions.get(j).x,y,Math.min(map.length - 1, southPositions.get(i).x + Math.abs(rand.nextInt(map.length - 1))),y));

@@ -16,7 +16,7 @@ public class Map {
     public int width;
     public int length;
     public int intIndex = 0;
-    public ArrayList<Intersection> inter = new ArrayList<Intersection>();
+    public ArrayList<Intersection> intersectionList = new ArrayList<Intersection>();
 
     public Map(int m, int n, int verticalRoads, int horizontalRoads, LightModel lightModel){
         this.length = m;
@@ -69,6 +69,8 @@ public class Map {
             }
         }
 
+        intersectionList = computeAllIntersections(lightModel);
+
     }
 
     public ArrayList<Direction> getPositionDirection(int x, int y){
@@ -79,8 +81,25 @@ public class Map {
         return horizontalRoads*verticalRoads;
     }
 
-    public ArrayList<Intersection> getAllIntersections(){
+    public ArrayList<Intersection> computeAllIntersections(LightModel lightModel){
+        int index = 0;
+        ArrayList<Intersection> inter = new ArrayList<Intersection>();
+        for (int i=0; i<horizontalRoads; i++){
+            for (int j=0; j< verticalRoads; j++){
+                ArrayList<Position> positions = new ArrayList<Position>();
+                positions.add(mapLocations[i*3+1][j*3+1]);
+                positions.add(mapLocations[i*3+1][j*3+2]);
+                positions.add(mapLocations[i*3+2][j*3+1]);
+                positions.add(mapLocations[i*3+2][j*3+2]);
+                inter.add(new Intersection(lightModel, index, positions));
+                index++;
+            }
+        }
         return inter;
+    }
+
+    public ArrayList<Intersection> getAllIntersections(LightModel lightModel){
+        return intersectionList;
     }
 
     public Intersection[] getIntersections(int index, Direction dir, LightModel lightModel){
@@ -140,7 +159,49 @@ public class Map {
                 }
         }
         Intersection[] a = new Intersection[is.size()];
-        inter.addAll(is);
+        return is.toArray(a);
+    }
+
+    public Intersection[] getMyIntersections(int index, Direction dir, LightModel lightModel){
+        ArrayList<Intersection> is = new ArrayList<Intersection>();
+        for (Intersection i : this.getAllIntersections(lightModel)){
+            ArrayList<Position> pos = i.locations;
+            switch (dir){
+                case EAST:
+                    for(Position p:pos){
+                        if(p.x == index*3+2){
+                            is.add(i);
+                            break;
+                        }
+                    }
+                    break;
+                case WEST:
+                    for(Position p:pos){
+                        if(p.x == index*3+1){
+                            is.add(i);
+                            break;
+                        }
+                    }
+                    break;
+                case NORTH:
+                    for(Position p:pos){
+                        if(p.y == index*3+2){
+                            is.add(i);
+                            break;
+                        }
+                    }
+                    break;
+                case SOUTH:
+                    for(Position p:pos){
+                        if(p.y == index*3+1){
+                            is.add(i);
+                            break;
+                        }
+                    }
+                    break;
+            }
+        }
+        Intersection[] a = new Intersection[is.size()];
         return is.toArray(a);
     }
 
