@@ -3,8 +3,12 @@ import javafx.geometry.Pos;
 /**
  * Created by neelshah on 7/23/15.
  */
+// The car is modeled as a Thread
 public class Car implements Runnable {
 
+    //Each car knows the intersections it has to pass through, the direction it's going, has a delay that corresponds to acceleration
+    //a unique id, its initial, final and current positions
+    //The car also has knowledge of the full map and its speed
     public Intersection[] intersections;
     public Direction direction;
     public long delay;
@@ -16,7 +20,7 @@ public class Car implements Runnable {
     public long speed;
     public long lastWait = 0L;
 
-
+    //Constructors - we need several depending on what we're testing
     public Car(Intersection[] intersections, Direction direction, int id) {
         this.intersections = intersections;
         this.direction = direction;
@@ -56,6 +60,7 @@ public class Car implements Runnable {
         this.map = map;
     }
 
+    //method to compute next position
     public Position NextPosition(int steps) {
         switch (this.direction) {
             case NORTH:
@@ -70,6 +75,9 @@ public class Car implements Runnable {
         return null;
     }
 
+    // thread lifecycle:
+    // The car thread finishes when the final destination is reached
+    //
     @Override
     public void run() {
         try {
@@ -113,25 +121,6 @@ public class Car implements Runnable {
                     currentPosition.exit();
                     currentPosition = next;
                 }
-                /*
-                for (Intersection intersection : intersections) {
-                    Barrier barrier = intersection.accept(this);
-
-                    while (barrier.isBlocking) {
-                        System.out.println("I ( " + this.id + " ) am waiting at intersection " + intersection.id + " going " + direction.toString() + "!!!");
-                        Thread.sleep(100L);
-                    }
-
-                    intersection.locks[direction.value].lock();
-
-                    Thread.sleep(speed * 10L * intersection.length);
-
-                    intersection.remove(this);
-
-                    intersection.locks[direction.value].unlock();
-
-                    System.out.println("I ( " + this.id + " ) have passed intersection " + intersection.id + " going " + direction.toString() + "!!!");
-                }*/
             }
             System.out.println("I ( " + this.id + " ) have reached my final destination");
             currentPosition.exit();
