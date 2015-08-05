@@ -12,16 +12,16 @@ public class Map {
     public int verticalRoads;
     public int horizontalRoads;
     private Position[][] intersections;
-    private LightModel lightModel;
+    private ArrayList<LightModel> lightModels;
     public int width;
     public int length;
     public int intIndex = 0;
     public ArrayList<Intersection> intersectionList = new ArrayList<Intersection>();
 
-    public Map(int m, int n, int verticalRoads, int horizontalRoads, LightModel lightModel){
+    public Map(int m, int n, int verticalRoads, int horizontalRoads, ArrayList<LightModel> lightModels){
         this.length = m;
         this.width = n;
-        this.lightModel = lightModel;
+        this.lightModels = lightModels;
 
         this.verticalRoads = verticalRoads;
 
@@ -69,7 +69,7 @@ public class Map {
             }
         }
 
-        intersectionList = computeAllIntersections(lightModel);
+        intersectionList = computeAllIntersections(lightModels);
 
     }
 
@@ -81,7 +81,7 @@ public class Map {
         return horizontalRoads*verticalRoads;
     }
 
-    public ArrayList<Intersection> computeAllIntersections(LightModel lightModel){
+    public ArrayList<Intersection> computeAllIntersections(ArrayList<LightModel> lightModel){
         int index = 0;
         ArrayList<Intersection> inter = new ArrayList<Intersection>();
         for (int i=0; i<horizontalRoads; i++){
@@ -91,14 +91,14 @@ public class Map {
                 positions.add(mapLocations[(i+1)*(length/(horizontalRoads+1))][(j+1)*(width/(verticalRoads+1))+1]);
                 positions.add(mapLocations[(i+1)*(length/(horizontalRoads+1))+1][(j+1)*(width/(verticalRoads+1))]);
                 positions.add(mapLocations[(i+1)*(length/(horizontalRoads+1))+1][(j+1)*(width/(verticalRoads+1))+1]);
-                inter.add(new Intersection(lightModel, index, positions));
+                inter.add(new Intersection(lightModel.get(index), index, positions));
                 index++;
             }
         }
         return inter;
     }
 
-    public ArrayList<Intersection> getAllIntersections(LightModel lightModel){
+    public ArrayList<Intersection> getAllIntersections(){
         return intersectionList;
     }
 
@@ -162,9 +162,9 @@ public class Map {
         return is.toArray(a);
     }
 
-    public Intersection[] getMyIntersections(int index, Direction dir, LightModel lightModel){
+    public Intersection[] getMyIntersections(int index, Direction dir){
         ArrayList<Intersection> is = new ArrayList<Intersection>();
-        for (Intersection i : this.getAllIntersections(lightModel)){
+        for (Intersection i : this.getAllIntersections()){
             ArrayList<Position> pos = i.locations;
             switch (dir){
                 case EAST:

@@ -14,15 +14,16 @@ public class RandomGeneratedCars {
                 new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
         };
 
-        LightModel lightModel = new TimedLightModel(barriers, 5000L);
+        ArrayList<LightModel> lightModel = new ArrayList<>();
+        lightModel.add(new TimedLightModel(barriers, 5000L));
 
         Map map = new Map(16,16,3,3,lightModel);
 
         map.print();
 
-        ArrayList<Car> cars = GenerateCars.GenerateCarsOnMap(map,0.8,lightModel);
+        ArrayList<Car> cars = GenerateCars.GenerateCarsOnMap(map,0.8);
 
-        Thread lightModelThread = new Thread(lightModel);
+        Thread lightModelThread = new Thread(lightModel.get(0));
         lightModelThread.start();
 
         for (Car car : cars) {
@@ -32,7 +33,7 @@ public class RandomGeneratedCars {
         Thread.sleep(10000L);
 
         System.out.println("Cars on map = "+cars.size());
-        for (Intersection intersection : map.getAllIntersections(lightModel)) {
+        for (Intersection intersection : map.getAllIntersections()) {
             System.out.println("Metrics for intersection " + intersection.id + ":");
             System.out.println("\t" + "Throughput : " + Arrays.toString(intersection.directionalThroughput));
             System.out.println("\t" + "Average Wait : " + Arrays.toString(intersection.directionalAverageWait));

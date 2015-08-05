@@ -1,3 +1,5 @@
+import javafx.scene.effect.Light;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,26 +57,24 @@ public class Simulation {
             return;
         }
 
-        //NEEL LOOK HERE
-        //Initialize the barriers
-
-        Barrier[] barriers = new Barrier[] {
-                new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
-                new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
-        };
-
-        LightModel lightModel;
-
-        // Decide whether we want to use a timed or nice traffic light model
-        if(timed) {
-            lightModel = new TimedLightModel(barriers, barrier_time);
-        } else {
-            lightModel = new NiceLightModel(barriers, barrier_threshold);
-        }
-
         if (test){
+            ArrayList<LightModel> lightModels = new ArrayList<LightModel>();
 
-            Map map = new Map(10,10,1,1,lightModel);
+            Barrier[] barriers = new Barrier[] {
+                    new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
+                    new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
+            };
+
+
+
+            // Decide whether we want to use a timed or nice traffic light model
+            if(timed) {
+                lightModels.add(new TimedLightModel(barriers, barrier_time));
+            } else {
+                lightModels.add(new NiceLightModel(barriers, barrier_threshold));
+            }
+
+            Map map = new Map(10,10,1,1,lightModels);
 
             if(print) {
                 map.print();
@@ -86,7 +86,7 @@ public class Simulation {
             pos.add(map.mapLocations[6][6]);
 
             Intersection[] intersections = new Intersection[] {
-                    new Intersection(lightModel, 0, pos)
+                    new Intersection(lightModels.get(0), 0, pos)
             };
 
             Car[] cars = new Car[] {
@@ -97,8 +97,15 @@ public class Simulation {
                     new Car(map, intersections, 500L, 3, 30, 9, 6, 0, 6),
             };
 
-            Thread lightModelThread = new Thread(lightModel);
-            lightModelThread.start();
+            ArrayList<Thread> lightModelThreads = new ArrayList<>();
+
+            for(LightModel lightModel : lightModels) {
+                lightModelThreads.add(new Thread(lightModel));
+            }
+
+            for (Thread t:lightModelThreads){
+                t.start();
+            }
 
             for (Car car : cars) {
                 new Thread(car).start();
@@ -113,24 +120,48 @@ public class Simulation {
                 System.out.println("\t" + "Max Wait : " + Arrays.toString(intersection.directionalMaxWait));
                 System.out.println("\t" + "Min Wait : " + Arrays.toString(intersection.directionalMinWait));
             }
-            lightModelThread.stop();
+            for(Thread t : lightModelThreads) {
+                t.stop();
+            }
         }
         else {
             // NEEL LOOK HERE!
             //This is the code that does the actual simulation
             // Create a new map
-            Map map = new Map(map_length, map_width, horizontal_roads, vertical_roads, lightModel);
+            ArrayList<LightModel> lightModels = new ArrayList<>();
+
+            for (int i=0; i<vertical_roads*horizontal_roads; i++){
+                Barrier[] barriers = new Barrier[] {
+                        new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
+                        new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
+                };
+                // Decide whether we want to use a timed or nice traffic light model
+                if(timed) {
+                    lightModels.add(new TimedLightModel(barriers, barrier_time));
+                } else {
+                    lightModels.add(new NiceLightModel(barriers, barrier_threshold));
+                }
+            }
+
+            Map map = new Map(map_length, map_width, horizontal_roads, vertical_roads, lightModels);
             //set this to true if you want the map printed
             if (print) {
                 map.print();
             }
 
             //generate random cars on the map using the load factor
-            ArrayList<Car> cars = GenerateCars.GenerateCarsOnMap(map, load_factor, lightModel);
+            ArrayList<Car> cars = GenerateCars.GenerateCarsOnMap(map, load_factor);
 
-            //create and start the light model thread
-            Thread lightModelThread = new Thread(lightModel);
-            lightModelThread.start();
+            //create and start the light model threads
+            ArrayList<Thread> lightModelThreads = new ArrayList<>();
+
+            for(LightModel lightModel : lightModels) {
+                lightModelThreads.add(new Thread(lightModel));
+            }
+
+            for (Thread t:lightModelThreads){
+                t.start();
+            }
 
             //create and start the car model threads
             Thread[] tcar = new Thread[cars.size()];
@@ -151,7 +182,9 @@ public class Simulation {
                 tcar[i].stop();
             }
 
-            lightModelThread.stop();
+            for(Thread t : lightModelThreads) {
+                t.stop();
+            }
 
             //write to file
             String COMMA_DELIMITER = ",";
@@ -162,7 +195,7 @@ public class Simulation {
             try {
                 fileWriter = new FileWriter("load"+(int)(load_factor*10)+args[5]+args[6]+".csv");
                 //Get all map intersections and print metrics
-                ArrayList<Intersection> intersections = map.getAllIntersections(lightModel);
+                ArrayList<Intersection> intersections = map.getAllIntersections();
 
                 for (Intersection intersection : intersections) {
                     System.out.println("Metrics for intersection " + intersection.id + ":");

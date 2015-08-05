@@ -17,10 +17,11 @@ public class MapTest {
                 new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
         };
 
-        LightModel lightModel = new TimedLightModel(barriers, 5000L);
+        ArrayList<LightModel> lightModels = new ArrayList<>();
+        lightModels.add(new TimedLightModel(barriers, 5000L));
         //LightModel lightModel = new NiceLightModel(barriers, 1);
 
-        Map map = new Map(10,10,1,1,lightModel);
+        Map map = new Map(10,10,1,1,lightModels);
 
         map.print();
 
@@ -31,7 +32,7 @@ public class MapTest {
         pos.add(map.mapLocations[2][2]);
 
         Intersection[] intersections = new Intersection[] {
-                new Intersection(lightModel, 0, pos)
+                new Intersection(lightModels.get(0), 0, pos)
         };
 
         Car[] cars = new Car[] {
@@ -42,7 +43,7 @@ public class MapTest {
                 new Car(map, intersections, 500L, 3, 30, 9, 2, 0, 2),
         };
 
-        Thread lightModelThread = new Thread(lightModel);
+        Thread lightModelThread = new Thread(lightModels.get(0));
         lightModelThread.start();
 
         for (Car car : cars) {
