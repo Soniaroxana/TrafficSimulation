@@ -55,7 +55,8 @@ public class Simulation {
             return;
         }
 
-
+        //NEEL LOOK HERE
+        //Initialize the barriers
 
         Barrier[] barriers = new Barrier[] {
                 new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
@@ -64,6 +65,7 @@ public class Simulation {
 
         LightModel lightModel;
 
+        // Decide whether we want to use a timed or nice traffic light model
         if(timed) {
             lightModel = new TimedLightModel(barriers, barrier_time);
         } else {
@@ -114,18 +116,23 @@ public class Simulation {
             lightModelThread.stop();
         }
         else {
-
+            // NEEL LOOK HERE!
+            //This is the code that does the actual simulation
+            // Create a new map
             Map map = new Map(map_length, map_width, horizontal_roads, vertical_roads, lightModel);
-
+            //set this to true if you want the map printed
             if (print) {
                 map.print();
             }
 
+            //generate random cars on the map using the load factor
             ArrayList<Car> cars = GenerateCars.GenerateCarsOnMap(map, load_factor, lightModel);
 
+            //create and start the light model thread
             Thread lightModelThread = new Thread(lightModel);
             lightModelThread.start();
 
+            //create and start the car model threads
             Thread[] tcar = new Thread[cars.size()];
 
             for (int i=0; i<cars.size(); i++) {
@@ -136,14 +143,17 @@ public class Simulation {
                 tcar[i].start();
             }
 
+            //sleep for duration
             Thread.sleep(duration);
 
+            //stop all car threads
             for (int i=0; i<cars.size(); i++) {
                 tcar[i].stop();
             }
 
             lightModelThread.stop();
 
+            //write to file
             String COMMA_DELIMITER = ",";
             String NEW_LINE ="\n";
             String FILE_HEADER = "intersection,NORTH,EAST,SOUTH,WEST,metric";
@@ -151,7 +161,7 @@ public class Simulation {
 
             try {
                 fileWriter = new FileWriter("load"+(int)(load_factor*10)+args[5]+args[6]+".csv");
-                //Write a new student object list to the CSV file
+                //Get all map intersections and print metrics
                 ArrayList<Intersection> intersections = map.getAllIntersections(lightModel);
 
                 for (Intersection intersection : intersections) {
