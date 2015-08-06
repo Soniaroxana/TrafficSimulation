@@ -44,6 +44,7 @@ public class Intersection {
         this.id = id;
         this.length = 2; //positions
 
+        //Metrics used to compute throughput, avg/max/min wait times
         this.directionalThroughput = new AtomicInteger[] {
                 new AtomicInteger(0),
                 new AtomicInteger(0),
@@ -78,10 +79,8 @@ public class Intersection {
         this.locations = positions;
     }
 
-    public void begin() {}
 
-    public void end() {}
-
+    //Method to add car to the intersection barrier which the car is crossing
     public Barrier accept(Car car) {
         for(Barrier barrier : barriers) {
             if (barrier.directions.contains(car.direction)) {
@@ -93,6 +92,7 @@ public class Intersection {
         return null;
     }
 
+    //Method to remove car from the barrier and compute metrics
     public Barrier remove(Car car) {
         for(Barrier barrier : barriers) {
             if (barrier.directions.contains(car.direction)) {

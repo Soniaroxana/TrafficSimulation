@@ -12,7 +12,10 @@ import java.lang.Math;
 /**
  * Created by soniamarginean on 7/30/15.
  */
+// Class used to degine methods for randomly generating Car objects
 public class GenerateCars {
+
+    //Method used to randomly generate cars at an intersection (position agnostic)
     public static ArrayList<Car> GenerateRandomCars(int n, Intersection[] intersections){
         ArrayList<Car> cars = new ArrayList<Car>();
         Random rand = new Random();
@@ -24,7 +27,7 @@ public class GenerateCars {
         return cars;
     }
 
-
+    //Method used to randomly generate Cars on a Map based on a configurable load factor
     public static ArrayList<Car> GenerateCarsOnMap(Map map, double loadFactor) {
         ArrayList<Car> cars = new ArrayList<Car>();
         Random rand = new Random();
@@ -32,7 +35,9 @@ public class GenerateCars {
         // also get the intersections per lane
         // last put positions/loadFactor cars on the road for each lane
         int carIndex = 0;
+
         for (int i=0; i< map.horizontalRoads; i++){
+            //Generate cars going EAST
             ArrayList<Position> eastPositions = map.getLanePositions(i, Direction.EAST);
             Intersection[] eastIntersections = map.getMyIntersections(i, Direction.EAST);
             int x = eastPositions.get(i).x;
@@ -40,6 +45,8 @@ public class GenerateCars {
                 cars.add(new Car(map,eastIntersections,Math.abs(100L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), x,eastPositions.get(j).y, x, map.width - 1));//Math.min(map.width - 1, eastPositions.get(j).y + Math.abs(rand.nextInt(map.width - 1)))));
                 carIndex++;
             }
+
+            //Generate cars going WEST
             ArrayList<Position> westPositions = map.getLanePositions(i, Direction.WEST);
             Intersection[] westIntersections = map.getMyIntersections(i, Direction.WEST);
             x = westPositions.get(i).x;
@@ -50,6 +57,7 @@ public class GenerateCars {
         }
 
         for (int i=0; i<map.verticalRoads; i++){
+            //Generate cars going NORTH
             ArrayList<Position> northPositions = map.getLanePositions(i, Direction.NORTH);
             Intersection[] northIntersections = map.getMyIntersections(i, Direction.NORTH);
             int y = northPositions.get(i).y;
@@ -58,6 +66,8 @@ public class GenerateCars {
                 cars.add(new Car(map,northIntersections,Math.abs(100L * (rand.nextInt() % 10)), carIndex,Math.abs((rand.nextInt() % 10) * 10), northPositions.get(j).x,y,0,y));
                 carIndex++;
             }
+
+            //Generate cars going SOUTH
             ArrayList<Position> southPositions = map.getLanePositions(i, Direction.SOUTH);
             Intersection[] southIntersections = map.getMyIntersections(i, Direction.SOUTH);
             y = southPositions.get(i).y;
@@ -72,7 +82,7 @@ public class GenerateCars {
     }
 
 
-
+    //Method used to generate cars from a file in an intersection (position-agnostic)
     public ArrayList<Car> GenerateCarsFromData(String filename, Intersection[] intersections) {
         ArrayList<Car> cars = new ArrayList<Car>();
         int id = 0;

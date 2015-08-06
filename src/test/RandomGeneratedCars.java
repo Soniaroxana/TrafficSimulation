@@ -9,22 +9,32 @@ import java.util.Arrays;
 public class RandomGeneratedCars {
     @Test
     public void testRandomlyGeneratedCars() throws InterruptedException {
-        Barrier[] barriers = new Barrier[] {
-                new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
-                new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
-        };
 
-        ArrayList<LightModel> lightModel = new ArrayList<>();
-        lightModel.add(new TimedLightModel(barriers, 5000L));
+        ArrayList<LightModel> lightModels = new ArrayList<>();
+        for (int i=0; i<3*3; i++){
+            Barrier[] barriers = new Barrier[] {
+                    new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
+                    new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
+            };
+            lightModels.add(new TimedLightModel(barriers, 5000));
+        }
 
-        Map map = new Map(16,16,3,3,lightModel);
+        Map map = new Map(16,16,3,3,lightModels);
 
         map.print();
 
         ArrayList<Car> cars = GenerateCars.GenerateCarsOnMap(map,0.8);
 
-        Thread lightModelThread = new Thread(lightModel.get(0));
-        lightModelThread.start();
+        //create and start the light model threads
+        ArrayList<Thread> lightModelThreads = new ArrayList<>();
+
+        for(LightModel lightModel : lightModels) {
+            lightModelThreads.add(new Thread(lightModel));
+        }
+
+        for (Thread t:lightModelThreads){
+            t.start();
+        }
 
         for (Car car : cars) {
             new Thread(car).start();

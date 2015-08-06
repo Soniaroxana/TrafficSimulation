@@ -77,7 +77,13 @@ public class Car implements Runnable {
 
     // thread lifecycle:
     // The car thread finishes when the final destination is reached
-    //
+    // to move to the next position the car computes it first
+    // if the next position is an intersection, then the car checks whether the traffic light is on or off
+    // while the traffic light is blocking the car waits
+    // once it's free to go, it grabs the semaphore for the next position, crosses and release the semaphore
+    // for the previous position
+    // If the next position is not an intersection, then the car tries to grab the semaphore for the next position
+    // and only releases its current position after it successfully entered the next position
     @Override
     public void run() {
         try {
@@ -89,6 +95,7 @@ public class Car implements Runnable {
                 if (next.locationtype == LocationType.INTERSECTION) {
                     for (Intersection intersection : intersections) {
                         if (intersection.locations.contains(next)) {
+                            //Add the car to the intersection and get its corresponding barrier based on the car direction
                             Barrier barrier = intersection.accept(this);
                             lastWait = System.currentTimeMillis();
 
@@ -101,15 +108,15 @@ public class Car implements Runnable {
                             }
                             waiting = false;
                             intersection.locks[direction.value].lock();
-
+                            //This sleep below simulates the car crossing at speed "speed" and intersection of length = length
                             Thread.sleep(speed * 10L * intersection.length);
                             next  = NextPosition(2);
                             next.enter();
                             currentPosition.exit();
                             currentPosition = next;
                             lastWait = System.currentTimeMillis() - lastWait;
+                            //finally remove the car from the intersection and unlock the direction the barrier was protecting
                             intersection.remove(this);
-
                             intersection.locks[direction.value].unlock();
 
                             System.out.println("I ( " + this.id + " ) have passed intersection " + intersection.id + " going " + direction.toString() + "!!!");

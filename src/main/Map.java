@@ -3,46 +3,51 @@ import java.util.ArrayList;
 /**
  * Created by soniamarginean on 7/30/15.
  */
+// Class that models the physical map
 public class Map {
-    //create a m by n positions map
-    //each intersection has 4 positions
-    //each road is 2 positions wide, one for each lane
-    //initially one intersection and two roads
+    // Each map is a grid of map locations (modeled by positions)
+    // Each map has a # of horizontal and vertical roads, with each road having 2 lanes running in opposite directions
     public Position[][] mapLocations;
     public int verticalRoads;
     public int horizontalRoads;
-    private Position[][] intersections;
     private ArrayList<LightModel> lightModels;
     public int width;
     public int length;
     public int intIndex = 0;
     public ArrayList<Intersection> intersectionList = new ArrayList<Intersection>();
 
+    //create a m by n positions map
+    // with a passed in number of vertical and horizontal roads
+    // and a set of light models corresponding to the intersections in the model
+    //each intersection has 4 positions
+    //each road is 2 positions wide, one for each lane
     public Map(int m, int n, int verticalRoads, int horizontalRoads, ArrayList<LightModel> lightModels){
         this.length = m;
         this.width = n;
         this.lightModels = lightModels;
 
+        // we want to be able to have cars on the road, not just intersection, so we restrict the number of possible
+        // intersections to a quarter of the map
         this.verticalRoads = verticalRoads;
-
         if (verticalRoads > n/4){
             this.verticalRoads = n/4;
         }
 
         this.horizontalRoads = horizontalRoads;
-
         if (horizontalRoads > n/4){
             this.horizontalRoads = n/4;
         }
 
+        // start off with all positions as scenery
         mapLocations = new Position[m][n];
-
         for (int i=0; i<m; i++){
             for (int j=0; j<n; j++){
                 mapLocations[i][j] = new Position(i,j, LocationType.SCENERY);
             }
         }
 
+        // as we go through the horizontal and vertical roads, place them evenly on the map, create lanes for the
+        // corresponding opposite directions and change the location type and directions accordingly
         for (int i=0; i<horizontalRoads; i++){
             for (int j=0; j<n; j++){
                 mapLocations[(i+1)*(m/(horizontalRoads+1))][j].locationtype = LocationType.LANE;
@@ -61,6 +66,8 @@ public class Map {
             }
         }
 
+        // finally find out where the intersections are (hint - they are the only locations with 2 directions)
+        // also create the intersection objects based on the light models passed in
         for (int i=0; i<m; i++){
             for (int j=0; j<n; j++){
                 if (mapLocations[i][j].directions.size() == 2){
@@ -73,14 +80,18 @@ public class Map {
 
     }
 
+    // Get the direction of a position
     public ArrayList<Direction> getPositionDirection(int x, int y){
         return mapLocations[x][y].directions;
     }
 
+    // Get the number of intersections on a map
     public int getNumberIntersections(){
         return horizontalRoads*verticalRoads;
     }
 
+    // Method which computes the 4 positions an intersection has and creates the list of intersections with their corresponding
+    // light model
     public ArrayList<Intersection> computeAllIntersections(ArrayList<LightModel> lightModel){
         int index = 0;
         ArrayList<Intersection> inter = new ArrayList<Intersection>();
@@ -98,10 +109,12 @@ public class Map {
         return inter;
     }
 
+    // returns the map's intersection list
     public ArrayList<Intersection> getAllIntersections(){
         return intersectionList;
     }
 
+    // Gets the intersection list in a certain direction for a certain lightmodel
     public Intersection[] getIntersections(int index, Direction dir, LightModel lightModel){
         ArrayList<Intersection> is = new ArrayList<Intersection>();
         switch (dir){
@@ -162,6 +175,8 @@ public class Map {
         return is.toArray(a);
     }
 
+    // Gets the intersections list in a direction dir for a road index
+    // this is how a car on a certain lane going a certain direction can get the intersections it needs to cross
     public Intersection[] getMyIntersections(int index, Direction dir){
         ArrayList<Intersection> is = new ArrayList<Intersection>();
         for (Intersection i : this.getAllIntersections()){
@@ -205,6 +220,10 @@ public class Map {
         return is.toArray(a);
     }
 
+    // returns the list of all valid positions on the map that can be initially populated by a car
+    // in a certain direction at the specified road index
+    // namely these are all the positions marked as Lane on that road in direction dir
+    // the car is not allowed to just sit in an intersection or in the scenery
     public ArrayList<Position> getLanePositions(int index, Direction dir){
         ArrayList<Position> pos = new ArrayList<Position>();
         switch (dir){
@@ -240,10 +259,12 @@ public class Map {
         return pos;
     }
 
+    // gets a position's location type on this map
     public LocationType getLocationType(int x, int y){
         return mapLocations[x][y].locationtype;
     }
 
+    // pretty prints the map using the location types of the positions
     public void print(){
         for (int i=0; i<this.length; i++){
             for (int j = 0; j<this.width; j++){
