@@ -1,15 +1,276 @@
-import javafx.scene.effect.Light;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by soniamarginean on 8/3/15.
  */
 public class Simulation {
 
+    private static class SimulationInstance implements Runnable {
+
+        public long duration;
+        public double loadFactor;
+        public boolean isTimed;
+        public long lightModelTime;
+        public int lightModelThreshold;
+
+        public int throughputPerIntersection = 0;
+        public long averageWaitTime = 0L;
+        public long maxWaitTime = Long.MIN_VALUE;
+        public long minWaitTime = Long.MAX_VALUE;
+
+
+        private int mapLength = 20;
+        private int mapWidth = 20;
+        private int verticalRoads = 2;
+        private int horizontalRoads = 2;
+
+        public SimulationInstance(long duration, double loadFactor, boolean isTimed, long lightModelTime, int lightModelThreshold) {
+            this.duration = duration;
+            this.loadFactor = loadFactor;
+            this.isTimed = isTimed;
+            this.lightModelTime = lightModelTime;
+            this.lightModelThreshold = lightModelThreshold;
+        }
+
+        @Override
+        public void run() {
+
+            ArrayList<LightModel> lightModels = new ArrayList<>();
+
+            for (int i = 0; i < verticalRoads * horizontalRoads; i++) {
+                Barrier[] barriers = new Barrier[]{
+                        new Barrier(Arrays.asList(Direction.NORTH, Direction.SOUTH)),
+                        new Barrier(Arrays.asList(Direction.EAST, Direction.WEST))
+                };
+                // Decide whether we want to use a timed or nice traffic light model
+                if (isTimed) {
+                    lightModels.add(new TimedLightModel(barriers, lightModelTime));
+                } else {
+                    lightModels.add(new NiceLightModel(barriers, lightModelThreshold));
+                }
+            }
+
+            Map map = new Map(mapLength, mapWidth, horizontalRoads, verticalRoads, lightModels);
+
+            //generate random cars on the map using the load factor
+            ArrayList<Car> cars = GenerateCars.GenerateCarsOnMap(map, loadFactor);
+
+            //create and start the light model threads
+            ArrayList<Thread> lightModelThreads = new ArrayList<>();
+
+            for (LightModel lightModel : lightModels) {
+                lightModelThreads.add(new Thread(lightModel));
+            }
+
+            for (Thread t : lightModelThreads) {
+                t.start();
+            }
+
+            //create and start the car model threads
+            Thread[] tcar = new Thread[cars.size()];
+
+            for (int i = 0; i < cars.size(); i++) {
+                tcar[i] = new Thread(cars.get(i));
+            }
+
+            for (int i = 0; i < cars.size(); i++) {
+                tcar[i].start();
+            }
+
+            //sleep for duration
+            try {
+                Thread.sleep(duration);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            //stop all car threads
+            for (int i = 0; i < cars.size(); i++) {
+                tcar[i].stop();
+            }
+
+            for (Thread t : lightModelThreads) {
+                t.stop();
+            }
+
+            for (Intersection intersection : map.getAllIntersections()) {
+                for (AtomicInteger directionalThroughput : intersection.directionalThroughput) {
+                    throughputPerIntersection += directionalThroughput.get();
+                }
+
+                long temp = 0L;
+
+                for (AtomicLong directionalAverageWait : intersection.directionalAverageWait) {
+                    temp += directionalAverageWait.get();
+                }
+
+                averageWaitTime += temp / 4;
+
+                for (AtomicLong directionalMaxWait : intersection.directionalMaxWait) {
+                    maxWaitTime = (maxWaitTime > directionalMaxWait.get() ? maxWaitTime : directionalMaxWait.get());
+                }
+
+                for (AtomicLong directionalMinWait : intersection.directionalMinWait) {
+                    minWaitTime = (minWaitTime < directionalMinWait.get() ? minWaitTime : directionalMinWait.get());
+                }
+            }
+
+            throughputPerIntersection /= map.getAllIntersections().size();
+            averageWaitTime /= map.getAllIntersections().size();
+        }
+    }
+
+
+    public static void main(String[] args) throws InterruptedException {
+        String COMMA_DELIMITER = ",";
+        String NEW_LINE ="\n";
+        String FILE_HEADER = ",Throughput/Intersection,Average Wait Time,Max Wait Time,Min Wait Time";
+        FileWriter fileWriter = null;
+
+        double[] loadFactors = new double[] {0.3, 0.5, 0.8, 1.0};
+        long[] durations = new long[] {1000L, 2000L, 4000L, 8000L};
+        int[] thresholds = new int[] {1, 2, 3, 4};
+
+        List<SimulationInstance> simulationInstances = new ArrayList<>();
+
+
+        for (double loadFactor: loadFactors) {
+            SimulationInstance simulationInstance = new SimulationInstance(40000L, loadFactor, true, 1000L, 0);
+            simulationInstances.add(simulationInstance);
+
+            Thread thread = new Thread(simulationInstance);
+            thread.start();
+            thread.join();
+        }
+
+        try {
+            fileWriter = new FileWriter("load_factors.csv");
+            fileWriter.append(FILE_HEADER);
+            fileWriter.append(NEW_LINE);
+
+            for (SimulationInstance simulationInstance : simulationInstances) {
+                fileWriter.append(String.valueOf(simulationInstance.loadFactor));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.throughputPerIntersection));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.averageWaitTime));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.maxWaitTime));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.minWaitTime));
+                fileWriter.append(NEW_LINE);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error in CsvFileWriter !!!");
+            e.printStackTrace();
+        } finally {
+            try {
+                assert fileWriter != null;
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException e) {
+                System.out.println("Error while flushing/closing fileWriter !!!");
+                e.printStackTrace();
+            }
+        }
+
+        simulationInstances.clear();
+        fileWriter = null;
+
+        for (long duration : durations) {
+            SimulationInstance simulationInstance = new SimulationInstance(40000L, 0.8, true, duration, 0);
+            simulationInstances.add(simulationInstance);
+
+            Thread thread = new Thread(simulationInstance);
+            thread.start();
+            thread.join();
+        }
+
+        try {
+            fileWriter = new FileWriter("durations.csv");
+            fileWriter.append(FILE_HEADER);
+            fileWriter.append(NEW_LINE);
+
+            for (SimulationInstance simulationInstance : simulationInstances) {
+                fileWriter.append(String.valueOf(simulationInstance.lightModelTime));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.throughputPerIntersection));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.averageWaitTime));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.maxWaitTime));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.minWaitTime));
+                fileWriter.append(NEW_LINE);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error in CsvFileWriter !!!");
+            e.printStackTrace();
+        } finally {
+            try {
+                assert fileWriter != null;
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException e) {
+                System.out.println("Error while flushing/closing fileWriter !!!");
+                e.printStackTrace();
+            }
+        }
+
+        simulationInstances.clear();
+        fileWriter = null;
+
+        for (int threshold : thresholds) {
+            SimulationInstance simulationInstance = new SimulationInstance(40000L, 0.8, false, 0L, threshold);
+            simulationInstances.add(simulationInstance);
+
+            Thread thread = new Thread(simulationInstance);
+            thread.start();
+            thread.join();
+        }
+
+        try {
+            fileWriter = new FileWriter("thresholds.csv");
+            fileWriter.append(FILE_HEADER);
+            fileWriter.append(NEW_LINE);
+
+            for (SimulationInstance simulationInstance : simulationInstances) {
+                fileWriter.append(String.valueOf(simulationInstance.lightModelThreshold));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.throughputPerIntersection));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.averageWaitTime));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.maxWaitTime));
+                fileWriter.append(COMMA_DELIMITER);
+                fileWriter.append(String.valueOf(simulationInstance.minWaitTime));
+                fileWriter.append(NEW_LINE);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error in CsvFileWriter !!!");
+            e.printStackTrace();
+        } finally {
+            try {
+                assert fileWriter != null;
+                fileWriter.flush();
+                fileWriter.close();
+            } catch (IOException e) {
+                System.out.println("Error while flushing/closing fileWriter !!!");
+                e.printStackTrace();
+            }
+        }
+    }
+
+/*
     public static void main(String[] args) throws InterruptedException {
         boolean test=false;
         boolean print = false;
@@ -126,7 +387,7 @@ public class Simulation {
         }
         else {
             // NEEL LOOK HERE!
-            //This is the code that does the actual simulation
+            // This is the code that does the actual simulation
             // Create a new map
             ArrayList<LightModel> lightModels = new ArrayList<>();
 
@@ -277,4 +538,5 @@ public class Simulation {
         }
 
     }
+*/
 }
